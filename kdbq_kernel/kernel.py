@@ -71,7 +71,7 @@ class KdbQKernel(Kernel):
             self._banner = check_output(['bash', '--version']).decode('utf-8')
         return self._banner
 
-    language_info = {'name': 'bash',
+    language_info = {'name': 'q',
                      'codemirror_mode': 'Q',
                      'mimetype': 'text/x-q',
                      'file_extension': '.q'}
@@ -100,7 +100,7 @@ class KdbQKernel(Kernel):
 
             # Using IREPLWrapper to get incremental output
             child = pexpect.spawn("q", echo=False, encoding='utf-8')
-            self.kdbqwrapper = IREPLWrapper(child, 'q)', line_output_callback = self.process_output)
+            self.kdbqwrapper = IREPLWrapper(child, u'q\u0029', None, line_output_callback = self.process_output)
             #self.kdbqwrapper = IREPLWrapper(child, u'\$', prompt_change,
             #                                extra_init_cmd="export PAGER=cat",
             #                                line_output_callback=self.process_output)
