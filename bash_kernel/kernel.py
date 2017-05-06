@@ -8,7 +8,7 @@ import os.path
 import re
 import signal
 
-__version__ = '0.6'
+__version__ = '0.1'
 
 version_pat = re.compile(r'version (\d+(\.\d+)+)')
 
@@ -54,8 +54,8 @@ class IREPLWrapper(replwrap.REPLWrapper):
         # Prompt received, so return normally
         return pos
 
-class BashKernel(Kernel):
-    implementation = 'bash_kernel'
+class KdbQKernel(Kernel):
+    implementation = 'kdbq_kernel'
     implementation_version = __version__
 
     @property
@@ -72,15 +72,15 @@ class BashKernel(Kernel):
         return self._banner
 
     language_info = {'name': 'bash',
-                     'codemirror_mode': 'shell',
-                     'mimetype': 'text/x-sh',
-                     'file_extension': '.sh'}
+                     'codemirror_mode': 'Q',
+                     'mimetype': 'ttext/x-q',
+                     'file_extension': '.q'}
 
     def __init__(self, **kwargs):
         Kernel.__init__(self, **kwargs)
-        self._start_bash()
+        self._start_kdbq()
 
-    def _start_bash(self):
+    def _start_kdbq(self):
         # Signal handlers are inherited by forked processes, and we can't easily
         # reset it from the subprocess. Since kernelapp ignores SIGINT except in
         # message handlers, we need to temporarily reset the SIGINT handler here
@@ -99,14 +99,14 @@ class BashKernel(Kernel):
             prompt_change = u"PS1='{0}' PS2='{1}' PROMPT_COMMAND=''".format(ps1, ps2)
 
             # Using IREPLWrapper to get incremental output
-            self.bashwrapper = IREPLWrapper(child, u'\$', prompt_change,
+            self.kdbqwrapper = IREPLWrapper(child, u'\$', prompt_change,
                                             extra_init_cmd="export PAGER=cat",
                                             line_output_callback=self.process_output)
         finally:
             signal.signal(signal.SIGINT, sig)
 
         # Register Bash function to write image data to temporary file
-        self.bashwrapper.run_command(image_setup_cmd)
+        self.kdbqwrapper.run_command(image_setup_cmd)
 
     def process_output(self, output):
         if not self.silent:
@@ -140,23 +140,23 @@ class BashKernel(Kernel):
             # output.  Also note that the return value from
             # run_command is not needed, because the output was
             # already sent by IREPLWrapper.
-            self.bashwrapper.run_command(code.rstrip(), timeout=None)
+            self.kdbqwrapper.run_command(code.rstrip(), timeout=None)
         except KeyboardInterrupt:
-            self.bashwrapper.child.sendintr()
+            self.kdbqwrapper.child.sendintr()
             interrupted = True
-            self.bashwrapper._expect_prompt()
-            output = self.bashwrapper.child.before
+            self.kdbqwrapper._expect_prompt()
+            output = self.kdbqwrapper.child.before
             self.process_output(output)
         except EOF:
-            output = self.bashwrapper.child.before + 'Restarting Bash'
-            self._start_bash()
+            output = self.kdbqwrapper.child.before + 'Restarting KdbQ'
+            self._start_kdbq()
             self.process_output(output)
 
         if interrupted:
             return {'status': 'abort', 'execution_count': self.execution_count}
 
         try:
-            exitcode = int(self.bashwrapper.run_command('echo $?').rstrip())
+            exitcode = int(self.kdbqwrapper.run_command('echo $?').rstrip())
         except Exception:
             exitcode = 1
 
@@ -191,14 +191,14 @@ class BashKernel(Kernel):
         if token[0] == '$':
             # complete variables
             cmd = 'compgen -A arrayvar -A export -A variable %s' % token[1:] # strip leading $
-            output = self.bashwrapper.run_command(cmd).rstrip()
+            output = self.kdbqwrapper.run_command(cmd).rstrip()
             completions = set(output.split())
             # append matches including leading $
             matches.extend(['$'+c for c in completions])
         else:
             # complete functions and builtins
             cmd = 'compgen -cdfa %s' % token
-            output = self.bashwrapper.run_command(cmd).rstrip()
+            output = self.kdbqwrapper.run_command(cmd).rstrip()
             matches.extend(output.split())
 
         if not matches:

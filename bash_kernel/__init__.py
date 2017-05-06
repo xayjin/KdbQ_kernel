@@ -1,3 +1,3 @@
-"""A bash kernel for Jupyter"""
+"""A Kdb/Q kernel for Jupyter"""
 
 from .kernel import __version__
