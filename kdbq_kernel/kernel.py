@@ -73,7 +73,7 @@ class KdbQKernel(Kernel):
 
     language_info = {'name': 'bash',
                      'codemirror_mode': 'Q',
-                     'mimetype': 'ttext/x-q',
+                     'mimetype': 'text/x-q',
                      'file_extension': '.q'}
 
     def __init__(self, **kwargs):
@@ -91,22 +91,24 @@ class KdbQKernel(Kernel):
             # bash() function of pexpect/replwrap.py.  Look at the
             # source code there for comments and context for
             # understanding the code here.
-            bashrc = os.path.join(os.path.dirname(pexpect.__file__), 'bashrc.sh')
-            child = pexpect.spawn("bash", ['--rcfile', bashrc], echo=False,
-                                  encoding='utf-8')
-            ps1 = replwrap.PEXPECT_PROMPT[:5] + u'\[\]' + replwrap.PEXPECT_PROMPT[5:]
-            ps2 = replwrap.PEXPECT_CONTINUATION_PROMPT[:5] + u'\[\]' + replwrap.PEXPECT_CONTINUATION_PROMPT[5:]
-            prompt_change = u"PS1='{0}' PS2='{1}' PROMPT_COMMAND=''".format(ps1, ps2)
+            #bashrc = os.path.join(os.path.dirname(pexpect.__file__), 'bashrc.sh')
+            #child = pexpect.spawn("bash", ['--rcfile', bashrc], echo=False,
+            #                      encoding='utf-8')
+            #ps1 = replwrap.PEXPECT_PROMPT[:5] + u'\[\]' + replwrap.PEXPECT_PROMPT[5:]
+            #ps2 = replwrap.PEXPECT_CONTINUATION_PROMPT[:5] + u'\[\]' + replwrap.PEXPECT_CONTINUATION_PROMPT[5:]
+            #prompt_change = u"PS1='{0}' PS2='{1}' PROMPT_COMMAND=''".format(ps1, ps2)
 
             # Using IREPLWrapper to get incremental output
-            self.kdbqwrapper = IREPLWrapper(child, u'\$', prompt_change,
-                                            extra_init_cmd="export PAGER=cat",
-                                            line_output_callback=self.process_output)
+            child = pexpect.spawn("q", echo=False, encoding='utf-8')
+            self.kdbqwrapper = IREPLWrapper(child, 'q)', line_output_callback = self.process_output)
+            #self.kdbqwrapper = IREPLWrapper(child, u'\$', prompt_change,
+            #                                extra_init_cmd="export PAGER=cat",
+            #                                line_output_callback=self.process_output)
         finally:
             signal.signal(signal.SIGINT, sig)
 
         # Register Bash function to write image data to temporary file
-        self.kdbqwrapper.run_command(image_setup_cmd)
+        #self.kdbqwrapper.run_command(image_setup_cmd)
 
     def process_output(self, output):
         if not self.silent:
