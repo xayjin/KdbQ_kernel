@@ -10,11 +10,12 @@ __Other Existing Kernels__
 
 # Todo
 
-- Multiline support
+- ~~Multiline support~~ Should be done now
 - Image support?
 - Code cleanup
 - Implementing code completion. 
-- Testing
+- Testing (I doubt k support currently works)
+- Pip/Conda publication
 
 
 # Install

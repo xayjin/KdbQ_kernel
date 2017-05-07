@@ -54,6 +54,31 @@ class IREPLWrapper(replwrap.REPLWrapper):
         # Prompt received, so return normally
         return pos
 
+    def run_command(self, command, timeout=-1):
+        """Send a command to the REPL, wait for and return output.
+
+        :param str command: The command to send. Trailing newlines are not needed.
+          This should be a complete block of input that will trigger execution;
+          if a continuation prompt is found after sending input, :exc:`ValueError`
+          will be raised.
+        :param int timeout: How long to wait for the next prompt. -1 means the
+          default from the :class:`pexpect.spawn` object (default 30 seconds).
+          None means to wait indefinitely.
+        """
+
+        cmdlines = command.splitlines()
+        # q needs everything on one line
+        singleline = ' '.join(cmdlines)
+
+        if not singleline:
+            raise ValueError("No command was given")
+
+        res = []
+        self.child.sendline(singleline)
+        self._expect_prompt(timeout=timeout)
+        res.append(self.child.before)
+        return u''.join(res)
+
 class KdbQKernel(Kernel):
     implementation = 'kdbq_kernel'
     implementation_version = __version__
