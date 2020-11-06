@@ -124,7 +124,8 @@ class KdbQKernel(Kernel):
             #prompt_change = u"PS1='{0}' PS2='{1}' PROMPT_COMMAND=''".format(ps1, ps2)
 
             # Using IREPLWrapper to get incremental output
-            child = pexpect.spawn("q", echo=False, encoding='utf-8')
+            # add xayjin
+            child = pexpect.spawn("/home/yajin/q/l32/q", echo=False, encoding='utf-8')
             self.kdbqwrapper = IREPLWrapper(child, u'q\u0029', None, line_output_callback = self.process_output)
             #self.kdbqwrapper = IREPLWrapper(child, u'\$', prompt_change,
             #                                extra_init_cmd="export PAGER=cat",
@@ -167,7 +168,17 @@ class KdbQKernel(Kernel):
             # output.  Also note that the return value from
             # run_command is not needed, because the output was
             # already sent by IREPLWrapper.
-            self.kdbqwrapper.run_command(code.rstrip(), timeout=None)
+            # xayjin get code to h
+            if(code.startswith("!!!")):
+                code=code[3:]
+                self.kdbqwrapper.run_command(code.rstrip(), timeout=None)
+            else:
+                codeall=code
+                codelines=codeall.splitlines()
+                for code in codelines:
+                    code = 'h \"' + code.replace('"', '\\"') + '\"'
+                    print(code)
+                    self.kdbqwrapper.run_command(code.rstrip(), timeout=None)
         except KeyboardInterrupt:
             self.kdbqwrapper.child.sendintr()
             interrupted = True
