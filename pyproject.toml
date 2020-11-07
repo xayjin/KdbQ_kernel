@@ -1,0 +1,13 @@
+[build-system]
+requires = ["flit_core >=2,<4"]
+build-backend = "flit_core.buildapi"
+
+[tool.flit.metadata]
+module = "kdbq_kernel"
+author = "GM"
+author-email = "newtux@gmail.com"
+home-page = "https://github.com/newtux/KdbQ_kernel"
+requires = ["pexpect (>=4.0)"]
+description-file = "README.md"
+classifiers = ["Framework :: IPython", "License :: OSI Approved :: BSD License", "Topic :: System :: Shells"]
+
